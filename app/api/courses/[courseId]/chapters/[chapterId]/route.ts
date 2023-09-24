@@ -8,12 +8,86 @@ const { Video } = new Mux(
   process.env.MUX_TOKEN_SECRET!
 );
 
+export async function DELETE(
+  req: Request,
+  { params }: { params: { courseId: string; chapterId: string } }
+) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const courseOwner = await db.course.findUnique({
+      where: {
+        id: params.courseId,
+        userId,
+      },
+    });
+
+    if (!courseOwner) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const chapter = await db.chapter.findUnique({
+      where: {
+        id: params.chapterId,
+        courseId: params.courseId,
+      },
+    });
+    if (!chapter) {
+      return new NextResponse("Not found", { status: 404 });
+    }
+
+    if (chapter.videoUrl) {
+      const existingMuxData = await db.muxData.findFirst({
+        where: {
+          chapterId: params.chapterId,
+        },
+      });
+
+      if (existingMuxData) {
+        await Video.Assets.del(existingMuxData.assetId);
+        await db.muxData.delete({
+          where: {
+            id: existingMuxData.id,
+          },
+        });
+      }
+    }
+    const deletedChapter = await db.chapter.delete({
+      where: {
+        id: params.chapterId,
+      },
+    });
+    const publishedChaptersInCourse = await db.course.findMany({
+      where: {
+        id: params.courseId,
+        isPublished: true,
+      },
+    });
+    if (!publishedChaptersInCourse.length) {
+      await db.course.update({
+        where: {
+          id: params.courseId,
+        },
+        data: {
+          isPublished: false,
+        },
+      });
+    }
+    return NextResponse.json(deletedChapter);
+  } catch (error) {
+    console.log("[CHAPTER_ID_DELETE]", error);
+    return new NextResponse("internal error", { status: 500 });
+  }
+}
+
 export async function PATCH(
   req: Request,
   { params }: { params: { courseId: string; chapterId: string } }
 ) {
   try {
-    const { userId } = await auth();
+    const { userId } = auth();
     const { isPublished, ...values } = await req.json();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
