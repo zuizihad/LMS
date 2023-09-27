@@ -29,12 +29,12 @@ const ChapterActions = ({
       setIsLoading(true);
       if (isPublished) {
         await axios.patch(
-          `/api/courses/${courseId}/chapters/${chapterId}/unpublished`
+          `/api/courses/${courseId}/chapters/${chapterId}/unpublish`
         );
         toast.success("Chapter unpublished");
       } else {
         await axios.patch(
-          `/api/courses/${courseId}/chapters/${chapterId}/published`
+          `/api/courses/${courseId}/chapters/${chapterId}/publish`
         );
         toast.success("Chapter published");
       }
