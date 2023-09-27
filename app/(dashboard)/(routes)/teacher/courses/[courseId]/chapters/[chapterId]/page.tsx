@@ -66,7 +66,7 @@ const ChapterIdPage = async ({
               <div className="flex flex-col gap-y-2">
                 <h1 className="text-2xl font-medium">Chapter creation</h1>
                 <span className="text-sm text-slate-700">
-                  Complete all fields ${completionText}
+                  Complete all fields {completionText}
                 </span>
               </div>
               <ChapterActions 
