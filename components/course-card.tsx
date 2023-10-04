@@ -4,6 +4,7 @@ import React from "react";
 import { IconBadge } from "./icon-badge";
 import { BookOpen } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import CourseProgress from "./course-progress";
 
 interface CourseCardProps {
   id: string;
@@ -11,7 +12,7 @@ interface CourseCardProps {
   imageUrl: string;
   chaptersLength: number;
   price: number;
-  progress?: number | null;
+  progress: number | null;
   category: string;
 }
 const CourseCard = ({
@@ -43,7 +44,11 @@ const CourseCard = ({
             </div>
           </div>
           {progress !== null ? (
-            <div>TODO: progress component</div>
+            <CourseProgress
+              variant={progress === 100 ? "success" : "default"}
+              size={`sm`}
+              value={progress}
+            />
           ) : (
             <p className="text-md md:text-sm font-medium text-slate-700">
               {formatPrice(price)}
